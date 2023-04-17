@@ -1,0 +1,12 @@
+# Archivos y directorios a ignorar
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+
+# Configuración de herramientas
+.idea/
+.vscode/
