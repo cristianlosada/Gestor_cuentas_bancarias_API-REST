@@ -5,7 +5,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-venv/
+servicio_REST/
 
 # Configuración de herramientas
 .idea/
