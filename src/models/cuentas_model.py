@@ -13,11 +13,8 @@ class cuentas_model():
             try:
                 with con.cursor() as cursor:
                   query = "SELECT * FROM cuentas_ahorros"
-                  # values = (cuenta_id,)
                   cursor.execute(query,)
-                  # resultado = cursor.fetchone()
                   resultado = cursor.fetchall()
-                  # return resultado
                   for row in resultado:
                       cuenta = cuentas(row[0], row[1], row[2], row[3], row[4])
                       cuentas_list.append(cuenta.to_JSON())
@@ -60,13 +57,15 @@ class cuentas_model():
             con.close()
             return filas_afectadas
         except Exception as ex:
-          print(ex) 
           raise Exception(ex)
         
     @classmethod
     def consignar(self, valor_cuenta):
         print(valor_cuenta)
         try:
+            saldo = self.consultar_cuenta(valor_cuenta['id'])
+            if  saldo == None:
+              return {'filas':0, 'saldo_actual':0}
             con = get_connection()
             with con.cursor() as cursor:
                 query = 'UPDATE cuentas_ahorros SET saldo = saldo+%s WHERE cuenta = %s'
@@ -75,7 +74,9 @@ class cuentas_model():
                 filas_afectadas = cursor.rowcount
                 con.commit()
             con.close()
-            return filas_afectadas
+            saldo = self.consultar_cuenta(valor_cuenta['id'])
+            data = {'filas':filas_afectadas, 'saldo_actual':int(Decimal(saldo['saldo']))}
+            return data
         except Exception as ex:
            raise Exception(ex)
     
@@ -83,9 +84,13 @@ class cuentas_model():
     def retirar(self, valor_monto):
         try:
             saldo = self.consultar_cuenta(valor_monto['id'])
+            if  saldo == None:
+              return {'filas':0, 'saldo_actual':0}
             saldo_actual = int(Decimal(saldo['saldo']))
-            if  saldo_actual < int(valor_monto['monto']):
-              return 0
+            print(saldo_actual, valor_monto['monto'])
+            if  int(saldo_actual) < int(valor_monto['monto']):
+              return {'filas':3, 'saldo_actual':int(saldo_actual)}
+            print('continua?')
             con = get_connection()
             with con.cursor() as cursor:
                 id = valor_monto['id']
@@ -95,7 +100,9 @@ class cuentas_model():
                 filas_afectadas = cursor.rowcount
                 con.commit()
             con.close()
-            return filas_afectadas
+            saldo = self.consultar_cuenta(valor_monto['id'])
+            data = {'filas':filas_afectadas, 'saldo_actual':int(Decimal(saldo['saldo']))}
+            return data
         except Exception as ex:
            raise Exception(ex)
              
